@@ -1,9 +1,9 @@
 package com.food.ordering.system.domain.valueobject;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 
-@EqualsAndHashCode
+@ToString
 public abstract class BaseId <T> {
     @Getter
     private final T value;
