@@ -22,7 +22,7 @@ public class OrderItem extends BaseEntity<OrderItemId> {
 
     void initializeOrderItem(OrderId orderId, OrderItemId orderItemId) {
         this.orderId = orderId;
-        super.setId(orderItemId);
+        setId(orderItemId);
     }
 
     boolean validateItem() {

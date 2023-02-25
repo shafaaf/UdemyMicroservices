@@ -27,6 +27,7 @@ public class Order extends AggregateRoot<OrderId> {
     private OrderStatus orderStatus;
     private List<String> failureMessages;
 
+    // TODO: Order already has order items set
     public void initializeOrder() {
         setId(new OrderId(UUID.randomUUID()));
         trackingId = new TrackingId(UUID.randomUUID());
@@ -67,7 +68,7 @@ public class Order extends AggregateRoot<OrderId> {
     private void initializeOrderItems() {
         long itemId = 1;
         for (OrderItem orderItem: orderItems) {
-            orderItem.initializeOrderItem(super.getId(), new OrderItemId(itemId++));
+            orderItem.initializeOrderItem(getId(), new OrderItemId(itemId++));
         }
     }
 
