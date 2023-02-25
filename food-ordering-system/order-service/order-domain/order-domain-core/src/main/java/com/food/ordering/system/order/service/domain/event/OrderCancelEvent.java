@@ -6,6 +6,6 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @AllArgsConstructor @Getter @Setter @SuperBuilder
-public class OrderCreateEvent extends OrderEvent {
+public class OrderCancelEvent extends OrderEvent {
 
 }

@@ -22,7 +22,7 @@ class Main {
                 .product(product)
                 .quantity(3)
                 .price(new Money(new BigDecimal(23)))
-                .id(new OrderItemId(UUID.randomUUID()))
+                .id(new OrderItemId(1L))
                 .orderId(new OrderId(UUID.randomUUID()))
                 .build();
         System.out.println(orderItem.toString());
