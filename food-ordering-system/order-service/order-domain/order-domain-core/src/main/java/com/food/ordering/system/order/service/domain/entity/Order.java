@@ -19,7 +19,7 @@ import java.util.UUID;
 public class Order extends AggregateRoot<OrderId> {
     private final CustomerId customerId;
     private final RestaurantId restaurantId;
-    private final StreetAddress streetAddress;
+    private final StreetAddress deliveryAddress;
     private final Money price;
     private final List<OrderItem> orderItems;
 

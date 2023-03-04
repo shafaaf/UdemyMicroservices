@@ -1,14 +1,10 @@
 package com.food.ordering.system.domain.valueobject;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 
-@ToString
+@ToString @AllArgsConstructor @Getter
 public abstract class BaseId <T> {
-    @Getter
     private final T value;
-
-    protected BaseId(T value) {
-        this.value = value;
-    }
 }
