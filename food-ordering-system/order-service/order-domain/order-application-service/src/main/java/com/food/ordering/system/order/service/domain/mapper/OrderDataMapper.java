@@ -6,7 +6,7 @@ import com.food.ordering.system.domain.valueobject.ProductId;
 import com.food.ordering.system.domain.valueobject.RestaurantId;
 import com.food.ordering.system.order.service.domain.dto.create.CreateOrderRequest;
 import com.food.ordering.system.order.service.domain.dto.create.CreateOrderResponse;
-import com.food.ordering.system.order.service.domain.dto.create.OrderAddress;
+import com.food.ordering.system.order.service.domain.dto.create.OrderAddressDto;
 import com.food.ordering.system.order.service.domain.dto.create.OrderItemDto;
 import com.food.ordering.system.order.service.domain.entity.Order;
 import com.food.ordering.system.order.service.domain.entity.OrderItem;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Component
 public class OrderDataMapper {
 
-    public Restaurant createOrderRequestToRestaurant(CreateOrderRequest createOrderRequest) {
+    public Restaurant createOrderRequestToRestaurantEntity(CreateOrderRequest createOrderRequest) {
         return Restaurant.builder()
                 .id(new RestaurantId(createOrderRequest.getRestaurantId()))
                 .products(createOrderRequest.getItems().stream().map(orderItemDto ->
@@ -33,19 +33,26 @@ public class OrderDataMapper {
                 .build();
     }
 
-    public Order createOrderRequestToOrder(CreateOrderRequest createOrderRequest) {
+    public Order createOrderRequestToOrderEntity(CreateOrderRequest createOrderRequest) {
         return Order.builder()
                 .customerId(new CustomerId(createOrderRequest.getCustomerId()))
                 .restaurantId(new RestaurantId(createOrderRequest.getRestaurantId()))
-                .deliveryAddress(orderAddressToStreetAddress(createOrderRequest.getAddress()))
+                .deliveryAddress(orderAddressToStreetAddressValueObject(createOrderRequest.getAddress()))
                 .price(new Money(createOrderRequest.getPrice()))
-                .orderItems(orderItemsToOrderItemEntities(createOrderRequest.getItems()))
+                .orderItems(orderItemsDtosToOrderItemEntities(createOrderRequest.getItems()))
                 .build();
     }
 
-    private List<OrderItem> orderItemsToOrderItemEntities(
-            List<OrderItemDto> orderItemDtos) {
-        return orderItemDtos.stream().map(orderItemDto ->
+    public CreateOrderResponse orderEntityToCreateOrderResponse(Order order) {
+        return CreateOrderResponse.builder()
+                .orderTrackingId(order.getTrackingId().getValue())
+                .orderStatus(order.getOrderStatus())
+                .build();
+    }
+
+    private List<OrderItem> orderItemsDtosToOrderItemEntities(
+            List<OrderItemDto> orderItemsDtos) {
+        return orderItemsDtos.stream().map(orderItemDto ->
             OrderItem.builder()
                 .product(
                     Product.builder()
@@ -59,19 +66,12 @@ public class OrderDataMapper {
         ).collect(Collectors.toList());
     }
 
-    private StreetAddress orderAddressToStreetAddress(OrderAddress orderAddress) {
+    private StreetAddress orderAddressToStreetAddressValueObject(OrderAddressDto orderAddressDto) {
         return StreetAddress.builder()
                 .id(UUID.randomUUID())
-                .street(orderAddress.getStreet())
-                .city(orderAddress.getCity())
-                .postalCode(orderAddress.getPostalCode())
-                .build();
-    }
-
-    public CreateOrderResponse orderToCreateOrderResponse(Order order) {
-        return CreateOrderResponse.builder()
-                .orderTrackingId(order.getTrackingId().getValue())
-                .orderStatus(order.getOrderStatus())
+                .street(orderAddressDto.getStreet())
+                .city(orderAddressDto.getCity())
+                .postalCode(orderAddressDto.getPostalCode())
                 .build();
     }
 }

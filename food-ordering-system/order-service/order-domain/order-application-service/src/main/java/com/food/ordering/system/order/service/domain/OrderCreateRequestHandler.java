@@ -40,16 +40,16 @@ public class OrderCreateRequestHandler {
     public CreateOrderResponse createOrder(CreateOrderRequest createOrderRequest) {
         checkCustomerExists(createOrderRequest.getCustomerId());
         Restaurant restaurant = checkRestaurant(createOrderRequest);
-        Order order = orderDataMapper.createOrderRequestToOrder(createOrderRequest);
+        Order order = orderDataMapper.createOrderRequestToOrderEntity(createOrderRequest);
         // TODO: Use below for events
         OrderCreateEvent orderCreateEvent = orderDomainService.validateAndInitiateOrder(order, restaurant);
         Order orderResult = saveOrder(order);
         log.info("Order is created with id: {}", orderResult.getId().getValue());
-        return orderDataMapper.orderToCreateOrderResponse(orderResult);
+        return orderDataMapper.orderEntityToCreateOrderResponse(orderResult);
     }
 
     private Restaurant checkRestaurant(CreateOrderRequest createOrderRequest) {
-        Restaurant restaurant = orderDataMapper.createOrderRequestToRestaurant(createOrderRequest);
+        Restaurant restaurant = orderDataMapper.createOrderRequestToRestaurantEntity(createOrderRequest);
         Optional<Restaurant> optionalRestaurant = restaurantRepository.findRestaurantInformation(restaurant);
         if (optionalRestaurant.isEmpty()) {
             log.warn("Could not find restaurant with restaurant id: {}", createOrderRequest.getRestaurantId());

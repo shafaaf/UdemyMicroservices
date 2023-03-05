@@ -22,5 +22,5 @@ public class CreateOrderRequest {
     @NotNull
     private final List<OrderItemDto> items;
     @NotNull
-    private final OrderAddress address;
+    private final OrderAddressDto address;
 }
