@@ -57,7 +57,7 @@ public class OrderDataMapper {
         return orderItemsDtos.stream().map(orderItemDto ->
             OrderItem.builder()
                 .product(
-                    Product.builder()
+                    Product.builder() // Imp: Only setting ids for product field
                     .id(new ProductId(orderItemDto.getProductId()))
                     .build()
                 )

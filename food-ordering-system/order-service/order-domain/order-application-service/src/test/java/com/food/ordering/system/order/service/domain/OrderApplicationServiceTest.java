@@ -14,6 +14,7 @@ import com.food.ordering.system.order.service.domain.ports.inputs.OrderApplicati
 import com.food.ordering.system.order.service.domain.ports.outputs.repository.CustomerRepository;
 import com.food.ordering.system.order.service.domain.ports.outputs.repository.OrderRepository;
 import com.food.ordering.system.order.service.domain.ports.outputs.repository.RestaurantRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -31,6 +32,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+@Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = OrderTestConfiguration.class)
 public class OrderApplicationServiceTest {
@@ -165,6 +167,7 @@ public class OrderApplicationServiceTest {
     @Test
     public void testCreateOrder() {
         CreateOrderResponse createOrderResponse = orderApplicationService.createOrder(createOrderRequest);
+        log.info("testCreateOrder: createOrderResponse is: " + createOrderResponse);
         assertEquals(createOrderResponse.getOrderStatus(), OrderStatus.PENDING);
         assertEquals(createOrderResponse.getMessage(), "Order created successfully!");
         assertNotNull(createOrderResponse.getOrderTrackingId());
