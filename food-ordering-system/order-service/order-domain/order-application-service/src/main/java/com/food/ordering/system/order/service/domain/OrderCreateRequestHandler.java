@@ -27,7 +27,7 @@ public class OrderCreateRequestHandler {
     public CreateOrderResponse createOrder(CreateOrderRequest createOrderRequest) {
         OrderCreateEvent orderCreateEvent = orderCreateHelper.persistOrder(createOrderRequest);
         log.info("Order is created with id: {}", orderCreateEvent.getOrder().getId().getValue());
-        orderCreatedPaymentRequestMessagePublisher.publish(orderCreateEvent);
-        return orderDataMapper.orderEntityToCreateOrderResponse(orderCreateEvent.getOrder());
+        // orderCreatedPaymentRequestMessagePublisher.publish(orderCreateEvent);
+        return orderDataMapper.orderEntityToCreateOrderResponse(orderCreateEvent.getOrder(), "Order created successfully!");
     }
 }

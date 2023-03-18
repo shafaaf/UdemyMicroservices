@@ -44,13 +44,13 @@ public class OrderDataMapper {
                 .build();
     }
 
-    public CreateOrderResponse orderEntityToCreateOrderResponse(Order order) {
+    public CreateOrderResponse orderEntityToCreateOrderResponse(Order order, String message) {
         return CreateOrderResponse.builder()
                 .orderTrackingId(order.getTrackingId().getValue())
                 .orderStatus(order.getOrderStatus())
+                .message(message)
                 .build();
     }
-
 
     private List<OrderItem> orderItemsDtosToOrderItemEntities(
             List<OrderItemDto> orderItemsDtos) {
