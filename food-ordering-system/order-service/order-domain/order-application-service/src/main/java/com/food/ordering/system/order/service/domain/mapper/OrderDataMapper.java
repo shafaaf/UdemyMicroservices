@@ -8,6 +8,7 @@ import com.food.ordering.system.order.service.domain.dto.create.CreateOrderReque
 import com.food.ordering.system.order.service.domain.dto.create.CreateOrderResponse;
 import com.food.ordering.system.order.service.domain.dto.create.OrderAddressDto;
 import com.food.ordering.system.order.service.domain.dto.create.OrderItemDto;
+import com.food.ordering.system.order.service.domain.dto.track.TrackOrderResponse;
 import com.food.ordering.system.order.service.domain.entity.Order;
 import com.food.ordering.system.order.service.domain.entity.OrderItem;
 import com.food.ordering.system.order.service.domain.entity.Product;
@@ -50,6 +51,7 @@ public class OrderDataMapper {
                 .build();
     }
 
+
     private List<OrderItem> orderItemsDtosToOrderItemEntities(
             List<OrderItemDto> orderItemsDtos) {
         return orderItemsDtos.stream().map(orderItemDto ->
@@ -66,6 +68,14 @@ public class OrderDataMapper {
         ).collect(Collectors.toList());
     }
 
+    public TrackOrderResponse orderEntityToTrackOrderResponse(Order order) {
+        return TrackOrderResponse.builder()
+                .orderTrackingId(order.getTrackingId().getValue())
+                .orderStatus(order.getOrderStatus())
+                .failureMessages(order.getFailureMessages())
+                .build();
+    }
+
     private StreetAddress orderAddressToStreetAddressValueObject(OrderAddressDto orderAddressDto) {
         return StreetAddress.builder()
                 .id(UUID.randomUUID())
@@ -74,4 +84,5 @@ public class OrderDataMapper {
                 .postalCode(orderAddressDto.getPostalCode())
                 .build();
     }
+
 }

@@ -15,5 +15,4 @@ public interface OrderDomainService {
     void approveOrder(Order order); // TODO: Why no OrderApprovedEvent
     OrderCancelEvent cancelOrderPayment(Order order, List<String> failureMessages);
     void cancelOrder(Order order, List<String> failureMessages); // TODO: Why no cancelOrderEvent
-
 }
