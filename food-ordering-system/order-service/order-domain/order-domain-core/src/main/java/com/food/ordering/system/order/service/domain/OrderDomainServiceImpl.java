@@ -1,6 +1,7 @@
 package com.food.ordering.system.order.service.domain;
 
 import com.food.ordering.system.order.service.domain.entity.Order;
+import com.food.ordering.system.order.service.domain.entity.Product;
 import com.food.ordering.system.order.service.domain.entity.Restaurant;
 import com.food.ordering.system.order.service.domain.event.OrderCancelEvent;
 import com.food.ordering.system.order.service.domain.event.OrderCreateEvent;
@@ -60,6 +61,12 @@ public class OrderDomainServiceImpl implements OrderDomainService {
     }
 
     private void setOrderProductInformation(Order order, Restaurant restaurant) {
-        // TODO: Unsure if needed - lec 17
+        order.getOrderItems().forEach(orderItem -> restaurant.getProducts().forEach(restaurantProduct -> {
+            Product currentProduct = orderItem.getProduct();
+            if (currentProduct.getId().getValue().equals(restaurantProduct.getId().getValue())) {
+                currentProduct.updateWithConfirmedNameAndPrice(restaurantProduct.getName(),
+                        restaurantProduct.getPrice());
+            }
+        }));
     }
 }
