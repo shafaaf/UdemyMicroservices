@@ -9,6 +9,7 @@ import com.food.ordering.system.order.service.domain.entity.Customer;
 import com.food.ordering.system.order.service.domain.entity.Order;
 import com.food.ordering.system.order.service.domain.entity.Product;
 import com.food.ordering.system.order.service.domain.entity.Restaurant;
+import com.food.ordering.system.order.service.domain.exception.OrderDomainException;
 import com.food.ordering.system.order.service.domain.mapper.OrderDataMapper;
 import com.food.ordering.system.order.service.domain.ports.inputs.OrderApplicationService;
 import com.food.ordering.system.order.service.domain.ports.outputs.repository.CustomerRepository;
@@ -16,6 +17,7 @@ import com.food.ordering.system.order.service.domain.ports.outputs.repository.Or
 import com.food.ordering.system.order.service.domain.ports.outputs.repository.RestaurantRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,13 +52,16 @@ public class OrderApplicationServiceTest {
     private CreateOrderRequest createOrderRequest;
     private CreateOrderRequest createOrderRequestWrongTotalPrice;
     private CreateOrderRequest createOrderRequestWrongProductPrice;
+
     private final UUID CUSTOMER_ID = UUID.fromString("d215b5f8-0249-4dc5-89a3-51fd148cfb41");
     private final UUID RESTAURANT_ID = UUID.fromString("d215b5f8-0249-4dc5-89a3-51fd148cfb45");
     private final UUID PRODUCT_ID_1 = UUID.fromString("d215b5f8-0249-4dc5-89a3-51fd148cfb48");
     private final UUID PRODUCT_ID_2 = UUID.fromString("d215b5f8-0249-4dc5-89a3-51fd148cfb49");
     private final UUID ORDER_ID = UUID.fromString("15a497c1-0f4b-4eff-b9f4-c402c8c07afb");
 
-    @BeforeAll
+    private Restaurant restaurant;
+
+    @BeforeEach
     public void init() {
         createOrderRequest = CreateOrderRequest.builder()
                 .customerId(CUSTOMER_ID)
@@ -90,7 +95,7 @@ public class OrderApplicationServiceTest {
                         .postalCode("1000AB")
                         .city("Paris")
                         .build())
-                .price(new BigDecimal("250.00"))
+                .price(new BigDecimal("250.00")) // wrong total price here
                 .items(List.of(
                         OrderItemDto.builder()
                                 .productId(PRODUCT_ID_1)
@@ -99,10 +104,10 @@ public class OrderApplicationServiceTest {
                                 .subTotal(new BigDecimal("50.00"))
                                 .build(),
                         OrderItemDto.builder()
-                                .productId(PRODUCT_ID_1)
+                                .productId(PRODUCT_ID_2)
                                 .quantity(3)
-                                .price(new BigDecimal("50.00"))
-                                .subTotal(new BigDecimal("150.00"))
+                                .price(new BigDecimal("10.00"))
+                                .subTotal(new BigDecimal("30.00"))
                                 .build()))
                 .build();
 
@@ -114,7 +119,7 @@ public class OrderApplicationServiceTest {
                         .postalCode("1000AB")
                         .city("Paris")
                         .build())
-                .price(new BigDecimal("250.00"))  // wrong price here
+                .price(new BigDecimal("80.00"))
                 .items(List.of(
                         OrderItemDto.builder()
                                 .productId(PRODUCT_ID_1)
@@ -123,10 +128,10 @@ public class OrderApplicationServiceTest {
                                 .subTotal(new BigDecimal("50.00"))
                                 .build(),
                         OrderItemDto.builder()
-                                .productId(PRODUCT_ID_1)
+                                .productId(PRODUCT_ID_2)
                                 .quantity(3)
-                                .price(new BigDecimal("50.00"))
-                                .subTotal(new BigDecimal("150.00"))
+                                .price(new BigDecimal("20.00"))
+                                .subTotal(new BigDecimal("60.00"))
                                 .build()))
                 .build();
 
@@ -134,7 +139,7 @@ public class OrderApplicationServiceTest {
         Customer customer = Customer.builder()
                 .id(new CustomerId(CUSTOMER_ID))
                 .build();
-        Restaurant restaurant = Restaurant.builder()
+        restaurant = Restaurant.builder()
                 .id(new RestaurantId(createOrderRequest.getRestaurantId()))
                 .products(
                         List.of(
@@ -157,8 +162,7 @@ public class OrderApplicationServiceTest {
         order.setId(new OrderId(ORDER_ID));
 
         when(customerRepository.findCustomer(CUSTOMER_ID)).thenReturn(Optional.of(customer));
-        Restaurant restaurant1 = orderDataMapper.createOrderRequestToRestaurantEntity(createOrderRequest);
-        when(restaurantRepository.findRestaurantInformation(eq(restaurant1)))
+        when(restaurantRepository.findRestaurantInformation(eq(orderDataMapper.createOrderRequestToRestaurantEntity(createOrderRequest))))
                 .thenReturn(Optional.of(restaurant));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
     }
@@ -167,16 +171,37 @@ public class OrderApplicationServiceTest {
     public void testCreateValidOrder () {
         CreateOrderResponse createOrderResponse = orderApplicationService.createOrder(createOrderRequest);
         log.info("testCreateOrder: createOrderResponse is: " + createOrderResponse);
-        assertEquals(createOrderResponse.getOrderStatus(), OrderStatus.PENDING);
-        assertEquals(createOrderResponse.getMessage(), "Order created successfully!");
+        assertEquals(OrderStatus.PENDING, createOrderResponse.getOrderStatus());
+        assertEquals("Order created successfully!", createOrderResponse.getMessage());
         assertNotNull(createOrderResponse.getOrderTrackingId());
     }
 
     @Test
     public void testCreateOrderWithWrongTotalPrice() {
-//        OrderDomainException orderDomainException = assertThrows(OrderDomainException.class,
-//                () -> orderApplicationService.createOrder(createOrderRequestWrongProductPrice));
-//        assertEquals(orderDomainException.getMessage(),
-//                "Total price: 250.00 is not equal to Order items total: 200.00!");
+        OrderDomainException orderDomainException = assertThrows(OrderDomainException.class,
+                () -> orderApplicationService.createOrder(createOrderRequestWrongTotalPrice));
+        assertEquals("Total price: 250.00 is not equal to Order items total: 80.00!", orderDomainException.getMessage());
+    }
+
+    @Test
+    public void testCreateOrderWithWrongProductPrice() {
+        OrderDomainException orderDomainException = assertThrows(OrderDomainException.class,
+                () -> orderApplicationService.createOrder(createOrderRequestWrongProductPrice));
+        assertEquals("Order item price: 20.00 is not valid for product: " + PRODUCT_ID_2, orderDomainException.getMessage());
+    }
+
+    @Test
+    public void testCreateOrderWithInactiveRestaurant () {
+        Restaurant inactiveRestaurant = Restaurant.builder()
+                .id(restaurant.getId())
+                .products(restaurant.getProducts())
+                .active(restaurant.isActive())
+                .active(false)
+                .build();
+        when(restaurantRepository.findRestaurantInformation(orderDataMapper.createOrderRequestToRestaurantEntity(createOrderRequest)))
+                .thenReturn(Optional.of(inactiveRestaurant));
+        OrderDomainException orderDomainException = assertThrows(OrderDomainException.class,
+                () -> orderApplicationService.createOrder(createOrderRequest));
+        assertEquals("Restaurant with id " + RESTAURANT_ID + " is currently not active!", orderDomainException.getMessage());
     }
 }

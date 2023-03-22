@@ -27,11 +27,12 @@ public class OrderItem extends BaseEntity<OrderItemId> {
 
     boolean validateItem() {
         boolean res = price.isGreaterThanZero() &&
+                // checks if the actual restaurant product item's price matches given price
                 price.equals(product.getPrice()) &&
                 price.multiply(quantity).equals(subTotal);
         if (!res) {
             throw new OrderDomainException("Order item price: " + price.getAmount() +
-                    " is not valid for product: " + product.getPrice());
+                    " is not valid for product: " + product.getId().getValue());
         }
         return true;
     }
