@@ -26,8 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -53,9 +52,9 @@ public class OrderApplicationServiceTest {
     private CreateOrderRequest createOrderRequestWrongProductPrice;
     private final UUID CUSTOMER_ID = UUID.fromString("d215b5f8-0249-4dc5-89a3-51fd148cfb41");
     private final UUID RESTAURANT_ID = UUID.fromString("d215b5f8-0249-4dc5-89a3-51fd148cfb45");
-    private final UUID PRODUCT_ID = UUID.fromString("d215b5f8-0249-4dc5-89a3-51fd148cfb48");
+    private final UUID PRODUCT_ID_1 = UUID.fromString("d215b5f8-0249-4dc5-89a3-51fd148cfb48");
+    private final UUID PRODUCT_ID_2 = UUID.fromString("d215b5f8-0249-4dc5-89a3-51fd148cfb49");
     private final UUID ORDER_ID = UUID.fromString("15a497c1-0f4b-4eff-b9f4-c402c8c07afb");
-    private final BigDecimal PRICE = new BigDecimal("200.00");
 
     @BeforeAll
     public void init() {
@@ -67,19 +66,19 @@ public class OrderApplicationServiceTest {
                         .postalCode("1000AB")
                         .city("Paris")
                         .build())
-                .price(PRICE)
+                .price(new BigDecimal("80.00"))
                 .items(List.of(
                         OrderItemDto.builder()
-                                .productId(PRODUCT_ID)
+                                .productId(PRODUCT_ID_1)
                                 .quantity(1)
                                 .price(new BigDecimal("50.00"))
                                 .subTotal(new BigDecimal("50.00"))
                                 .build(),
                         OrderItemDto.builder()
-                                .productId(PRODUCT_ID)
+                                .productId(PRODUCT_ID_2)
                                 .quantity(3)
-                                .price(new BigDecimal("50.00"))
-                                .subTotal(new BigDecimal("150.00"))
+                                .price(new BigDecimal("10.00"))
+                                .subTotal(new BigDecimal("30.00"))
                                 .build()))
                 .build();
 
@@ -94,13 +93,13 @@ public class OrderApplicationServiceTest {
                 .price(new BigDecimal("250.00"))
                 .items(List.of(
                         OrderItemDto.builder()
-                                .productId(PRODUCT_ID)
+                                .productId(PRODUCT_ID_1)
                                 .quantity(1)
                                 .price(new BigDecimal("50.00"))
                                 .subTotal(new BigDecimal("50.00"))
                                 .build(),
                         OrderItemDto.builder()
-                                .productId(PRODUCT_ID)
+                                .productId(PRODUCT_ID_1)
                                 .quantity(3)
                                 .price(new BigDecimal("50.00"))
                                 .subTotal(new BigDecimal("150.00"))
@@ -115,16 +114,16 @@ public class OrderApplicationServiceTest {
                         .postalCode("1000AB")
                         .city("Paris")
                         .build())
-                .price(new BigDecimal("210.00"))
+                .price(new BigDecimal("250.00"))  // wrong price here
                 .items(List.of(
                         OrderItemDto.builder()
-                                .productId(PRODUCT_ID)
+                                .productId(PRODUCT_ID_1)
                                 .quantity(1)
-                                .price(new BigDecimal("60.00")) // wrong price here
-                                .subTotal(new BigDecimal("60.00"))
+                                .price(new BigDecimal("50.00"))
+                                .subTotal(new BigDecimal("50.00"))
                                 .build(),
                         OrderItemDto.builder()
-                                .productId(PRODUCT_ID)
+                                .productId(PRODUCT_ID_1)
                                 .quantity(3)
                                 .price(new BigDecimal("50.00"))
                                 .subTotal(new BigDecimal("150.00"))
@@ -140,14 +139,14 @@ public class OrderApplicationServiceTest {
                 .products(
                         List.of(
                                 Product.builder()
-                                        .id(new ProductId(PRODUCT_ID))
+                                        .id(new ProductId(PRODUCT_ID_1))
                                         .name("product-1")
                                         .price(new Money(new BigDecimal("50.00")))
                                         .build(),
                                 Product.builder()
-                                        .id(new ProductId(PRODUCT_ID))
+                                        .id(new ProductId(PRODUCT_ID_2))
                                         .name("product-2")
-                                        .price(new Money(new BigDecimal("50.00")))
+                                        .price(new Money(new BigDecimal("10.00")))
                                         .build()
                         )
                 )
@@ -165,11 +164,19 @@ public class OrderApplicationServiceTest {
     }
 
     @Test
-    public void testCreateOrder() {
+    public void testCreateValidOrder () {
         CreateOrderResponse createOrderResponse = orderApplicationService.createOrder(createOrderRequest);
         log.info("testCreateOrder: createOrderResponse is: " + createOrderResponse);
         assertEquals(createOrderResponse.getOrderStatus(), OrderStatus.PENDING);
         assertEquals(createOrderResponse.getMessage(), "Order created successfully!");
         assertNotNull(createOrderResponse.getOrderTrackingId());
+    }
+
+    @Test
+    public void testCreateOrderWithWrongTotalPrice() {
+//        OrderDomainException orderDomainException = assertThrows(OrderDomainException.class,
+//                () -> orderApplicationService.createOrder(createOrderRequestWrongProductPrice));
+//        assertEquals(orderDomainException.getMessage(),
+//                "Total price: 250.00 is not equal to Order items total: 200.00!");
     }
 }

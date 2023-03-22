@@ -37,7 +37,7 @@ public class OrderCreateHelper {
     }
 
     @Transactional
-    public OrderCreateEvent persistOrder(CreateOrderRequest createOrderRequest) {
+    public OrderCreateEvent setupOrder(CreateOrderRequest createOrderRequest) {
         checkCustomer(createOrderRequest.getCustomerId());
         Restaurant restaurant = checkRestaurant(createOrderRequest);
         Order order = orderDataMapper.createOrderRequestToOrderEntity(createOrderRequest);
