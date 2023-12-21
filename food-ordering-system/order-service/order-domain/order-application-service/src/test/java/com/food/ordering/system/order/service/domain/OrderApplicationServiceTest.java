@@ -16,7 +16,6 @@ import com.food.ordering.system.order.service.domain.ports.outputs.repository.Cu
 import com.food.ordering.system.order.service.domain.ports.outputs.repository.OrderRepository;
 import com.food.ordering.system.order.service.domain.ports.outputs.repository.RestaurantRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -130,7 +129,7 @@ public class OrderApplicationServiceTest {
                         OrderItemDto.builder()
                                 .productId(PRODUCT_ID_2)
                                 .quantity(3)
-                                .price(new BigDecimal("20.00"))
+                                .price(new BigDecimal("20.00")) // not correct as PRODUCT_ID_2 has a price of 10.00
                                 .subTotal(new BigDecimal("60.00"))
                                 .build()))
                 .build();
